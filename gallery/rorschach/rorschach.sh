@@ -24,7 +24,8 @@ declare -a TARGET_GRID
 SYM_MODE=0
 
 init_symmetry() {
-    SYM_MODE=$((RANDOM % 5))
+    local modes=(0 2 3 4)
+    SYM_MODE=${modes[$((RANDOM % 4))]}
 }
 
 symmetrize_grid() {

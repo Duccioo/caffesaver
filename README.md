@@ -22,7 +22,7 @@ This fork builds upon the original by introducing performance optimizations for 
 *   **macOS Optimizations:** The main script is optimized for macOS, ensuring smooth performance and compatibility.
 *   **Automatic `caffeinate`:** On macOS, the script automatically uses `caffeinate -d` to prevent the display from sleeping, allowing for an uninterrupted screensaver experience.
 *   **Perlin Noise Engine:** Includes a custom-built, integer-based Perlin noise implementation written in pure Bash, powering generative animations like "Dunes".
-*   **New Screensaver: Dunes:** A mesmerizing, animated landscape generated using Perlin noise, creating the illusion of rolling sand dunes.
+*   **New Screensavers:** Includes exclusive screensavers like **Dunes** (a mesmerizing, animated landscape) and **Rorschach** (generative symmetrical inkblots).
 
 ## Gallery
 
