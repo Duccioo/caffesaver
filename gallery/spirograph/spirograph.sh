@@ -84,6 +84,8 @@ reset_grid() {
     clear
 }
 
+_pixel_buffer=""
+
 draw_pixel() {
     local x=$1
     local y=$2
@@ -99,9 +101,8 @@ draw_pixel() {
 
              local color=$((232 + val))
 
-             tput cup $y $x
-             tput setab $color
-             echo -n " "
+             # Use ANSI escape codes directly (no fork)
+             _pixel_buffer+="\e[$((y + 1));$((x + 1))H\e[48;5;${color}m "
          fi
     fi
 }
@@ -197,12 +198,17 @@ EOF
              draw_pixel "$x" "$y"
 
              t=$((t + step))
-             # Optimization: Draw in larger chunks to speed up animation
+             # Flush pixel buffer in chunks for smooth animation
              if (( i % 200 == 0 )); then
+                 printf '%b' "$_pixel_buffer"
+                 _pixel_buffer=""
                  sleep "${SCREENSAVER_DELAY:-0.033}"
              fi
         done
 
+        # Flush any remaining pixels and reset colors
+        printf '%b' "$_pixel_buffer\e[0m"
+        _pixel_buffer=""
         sleep 3
     done
 }

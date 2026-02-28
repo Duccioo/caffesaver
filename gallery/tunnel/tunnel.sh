@@ -18,6 +18,17 @@ _cleanup_and_exit() { # handler for SIGINT (Ctrl‑C)
 
 trap _cleanup_and_exit EXIT INT TERM # Ctrl‑C
 
+# Pre-compute sin/cos lookup table (single fork at startup)
+_TUNNEL_LUT_SIZE=1257
+declare -a _TUNNEL_COS_LUT _TUNNEL_SIN_LUT
+_tunnel_i=0
+while IFS=' ' read -r _c _s; do
+    _TUNNEL_COS_LUT[_tunnel_i]=$_c
+    _TUNNEL_SIN_LUT[_tunnel_i]=$_s
+    ((_tunnel_i++))
+done < <(awk 'BEGIN { for (i=0; i<1257; i++) { a=i*0.005; printf "%d %d\n", int(cos(a)*10000+0.5), int(sin(a)*10000+0.5) } }')
+unset _tunnel_i _c _s
+
 #
 # Main animation loop
 #
@@ -36,7 +47,7 @@ animate() {
     local center_y=$original_center_y
     local center_offset_x=$((width / 4))
     local center_offset_y=$((height / 4))
-    local angle=0
+    local _angle_idx=0
     local max_radius=$((width + height))
     local ribbon_spacing=7
     local -a radii=()
@@ -45,12 +56,10 @@ animate() {
 
     # --- New state variables for movement ---
     local is_moving=0 # Start in a paused state
-    local next_state_change_time
-    next_state_change_time=$(date +%s)
+    local next_state_change_time=$SECONDS
     local move_duration=10 # seconds
     local min_pause_duration=5 # seconds
     local max_pause_duration=20 # seconds
-    local angle_increment=0.005 # Slow down the movement
 
 
     # Plot a point, checking for screen boundaries
@@ -71,8 +80,7 @@ animate() {
 
     while true; do
         # --- State management for movement ---
-        local current_time
-        current_time=$(date +%s)
+        local current_time=$SECONDS
         if (( current_time >= next_state_change_time )); then
             if (( is_moving )); then
                 # Transition to paused state
@@ -88,18 +96,9 @@ animate() {
 
         # --- Update center coordinates only when moving ---
         if (( is_moving )); then
-            # When moving, the center of the tunnel is continuously recalculated
-            # to create the illusion of flying through a turning tunnel.
-            read -r angle center_x center_y < <(awk -v angle="$angle" \
-                -v center_x="$original_center_x" -v center_y="$original_center_y" \
-                -v offset_x="$center_offset_x" -v offset_y="$center_offset_y" \
-                -v angle_increment="$angle_increment" \
-                'BEGIN {
-                    angle += angle_increment;
-                    cx = int(center_x + offset_x * cos(angle));
-                    cy = int(center_y + offset_y * sin(angle));
-                    print angle, cx, cy;
-                }')
+            _angle_idx=$(( (_angle_idx + 1) % _TUNNEL_LUT_SIZE ))
+            center_x=$(( original_center_x + center_offset_x * _TUNNEL_COS_LUT[_angle_idx] / 10000 ))
+            center_y=$(( original_center_y + center_offset_y * _TUNNEL_SIN_LUT[_angle_idx] / 10000 ))
         fi
 
 
@@ -111,8 +110,8 @@ animate() {
 
         local -a next_radii=()
         for ridge_data in "${radii[@]}"; do
-            local r cx cy
-            read -r r cx cy <<< "$ridge_data"
+            local -a _parts=($ridge_data)
+            local r=${_parts[0]} cx=${_parts[1]} cy=${_parts[2]}
 
             if [ $r -gt 0 ]; then
                 local prev_r=$((r-1))

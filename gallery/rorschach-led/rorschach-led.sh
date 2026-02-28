@@ -28,12 +28,13 @@ init_symmetry() {
 }
 
 symmetrize_grid() {
+    local y x source_idx target_idx half_w half_h
     # Helper to copy Upper-Right Triangle to Lower-Left Triangle (Diagonal Mirror)
     if [[ $SYM_MODE -eq 2 || $SYM_MODE -eq 4 ]]; then
         for ((y=0; y<GRID_H; y++)); do
             for ((x=y+1; x<GRID_W; x++)); do
-                local source_idx=$((y * GRID_W + x))
-                local target_idx=$((x * GRID_W + y))
+                source_idx=$((y * GRID_W + x))
+                target_idx=$((x * GRID_W + y))
                 NOISE_GRID[target_idx]=${NOISE_GRID[source_idx]}
                 TARGET_GRID[target_idx]=${TARGET_GRID[source_idx]}
             done
@@ -42,11 +43,11 @@ symmetrize_grid() {
 
     # Helper to copy Left Half to Right Half (Vertical Mirror)
     if [[ $SYM_MODE -eq 0 || $SYM_MODE -eq 3 || $SYM_MODE -eq 4 ]]; then
-        local half_w=$((GRID_W / 2))
+        half_w=$((GRID_W / 2))
         for ((y=0; y<GRID_H; y++)); do
             for ((x=0; x<half_w; x++)); do
-                local source_idx=$((y * GRID_W + x))
-                local target_idx=$((y * GRID_W + (GRID_W - 1 - x)))
+                source_idx=$((y * GRID_W + x))
+                target_idx=$((y * GRID_W + (GRID_W - 1 - x)))
                 NOISE_GRID[target_idx]=${NOISE_GRID[source_idx]}
                 TARGET_GRID[target_idx]=${TARGET_GRID[source_idx]}
             done
@@ -55,11 +56,11 @@ symmetrize_grid() {
 
     # Helper to copy Top Half to Bottom Half (Horizontal Mirror)
     if [[ $SYM_MODE -eq 1 || $SYM_MODE -eq 3 || $SYM_MODE -eq 4 ]]; then
-        local half_h=$((GRID_H / 2))
+        half_h=$((GRID_H / 2))
         for ((y=0; y<half_h; y++)); do
             for ((x=0; x<GRID_W; x++)); do
-                local source_idx=$((y * GRID_W + x))
-                local target_idx=$(((GRID_H - 1 - y) * GRID_W + x))
+                source_idx=$((y * GRID_W + x))
+                target_idx=$(((GRID_H - 1 - y) * GRID_W + x))
                 NOISE_GRID[target_idx]=${NOISE_GRID[source_idx]}
                 TARGET_GRID[target_idx]=${TARGET_GRID[source_idx]}
             done
@@ -76,12 +77,13 @@ done
 symmetrize_grid
 
 update_grid() {
+    local i current target diff step
     for ((i=0; i<GRID_W*GRID_H; i++)); do
-        local current=${NOISE_GRID[i]}
-        local target=${TARGET_GRID[i]}
+        current=${NOISE_GRID[i]}
+        target=${TARGET_GRID[i]}
 
         # Calculate difference
-        local diff=$((target - current))
+        diff=$((target - current))
 
         if (( diff == 0 )); then
             # Reached target, pick new one
@@ -89,7 +91,7 @@ update_grid() {
         else
             # Move towards target with easing
             # Faster speed: divide by 8 instead of 16
-            local step=$(( diff / 8 ))
+            step=$(( diff / 8 ))
 
             # Ensure minimum movement of 1 to prevent stalling
             if (( step == 0 )); then
@@ -118,55 +120,54 @@ animate() {
     local gh_minus_1=$((GRID_H - 1))
 
     # Palette: Transparent + 4 shades + Orange Accent
-    # Index 0 will be handled as transparent (default bg)
-    # Index 5 will be handled as Orange (208)
     local palette=(0 237 242 247 252 208)
+
+    # -------------------------------------------------------------
+    # Memory optimization: declare loop variables OUTSIDE the loop
+    # to avoid Bash 3.2 memory leak from re-creating 'local' inside
+    # tight loops.
+    # -------------------------------------------------------------
+    local frame_buffer y y_scaled gy ry row_idx_1 row_idx_2
+    local gx current_x x_scaled rx v_left v_right val noise p_idx color
+    local v1 v2
 
     clear # Clear screen initially
 
     while true; do
         update_grid
-        local frame_buffer="\e[H"
+        frame_buffer="\e[H"
 
         for ((y=0; y<height; y++)); do
-            # Vertical interpolation logic (unchanged)
-            local y_scaled=$(( y * gh_minus_1 * 1000 / height ))
-            local gy=$(( y_scaled / 1000 ))
-            local ry=$(( y_scaled % 1000 ))
-            local row_idx_1=$(( gy * GRID_W ))
-            local row_idx_2=$(( (gy + 1) * GRID_W ))
+            # Vertical interpolation logic
+            y_scaled=$(( y * gh_minus_1 * 1000 / height ))
+            gy=$(( y_scaled / 1000 ))
+            ry=$(( y_scaled % 1000 ))
+            row_idx_1=$(( gy * GRID_W ))
+            row_idx_2=$(( (gy + 1) * GRID_W ))
 
-            local current_row_vals=()
-            for ((gx=0; gx<GRID_W; gx++)); do
-                local v1=${NOISE_GRID[row_idx_1 + gx]}
-                local v2=${NOISE_GRID[row_idx_2 + gx]}
-                local v=$(( v1 + (v2 - v1) * ry / 1000 ))
-                current_row_vals+=("$v")
-            done
-
-            local color=0 # Default color index (Transparent)
+            color=0 # Default color index (Transparent)
 
             # Correct Horizontal Interpolation
-            # Directly map screen x (current_x) to grid coordinates (gx)
             for ((current_x=0; current_x<calc_width; current_x++)); do
-                 local x_scaled=$(( current_x * gw_minus_1 * 1000 / calc_width ))
-                 local gx=$(( x_scaled / 1000 ))
-                 local rx=$(( x_scaled % 1000 ))
+                 x_scaled=$(( current_x * gw_minus_1 * 1000 / calc_width ))
+                 gx=$(( x_scaled / 1000 ))
+                 rx=$(( x_scaled % 1000 ))
 
-                 local v_left=${current_row_vals[gx]}
-                 local v_right=${current_row_vals[gx+1]}
+                 # Omit temporary array creation, calculate left/right vals inline
+                 v1=${NOISE_GRID[row_idx_1 + gx]}
+                 v2=${NOISE_GRID[row_idx_2 + gx]}
+                 v_left=$(( v1 + (v2 - v1) * ry / 1000 ))
+
+                 v1=${NOISE_GRID[row_idx_1 + gx + 1]}
+                 v2=${NOISE_GRID[row_idx_2 + gx + 1]}
+                 v_right=$(( v1 + (v2 - v1) * ry / 1000 ))
 
                  # Interpolate
-                 local val=$(( v_left + (v_right - v_left) * rx / 1000 ))
+                 val=$(( v_left + (v_right - v_left) * rx / 1000 ))
 
-                 # ----------------------------------------------------
-                 # NEW FEATURE: Gaussian Noise (Film Grain)
-                 # ----------------------------------------------------
-                 # "Giusto un pochino" (Just a little bit)
-                 # Add random value between -8 and +8 to add texture
-                 # Probabilistic: 50% chance to add noise (adding or not)
+                 # Gaussian Noise
                  if (( RANDOM % 2 == 0 )); then
-                    local noise=$(( (RANDOM % 17) - 8 ))
+                    noise=$(( (RANDOM % 17) - 8 ))
                     val=$(( val + noise ))
                  fi
 
@@ -174,32 +175,18 @@ animate() {
                  if (( val < 0 )); then val=0; fi
                  if (( val > 255 )); then val=255; fi
 
-                 # ----------------------------------------------------
-                 # NEW FEATURE: Palette Logic with Transparency & Accent
-                 # ----------------------------------------------------
-                 # Logic:
-                 # 0-50: Transparent (Index 0)
-                 # 50-100: Shade 1 (Index 1)
-                 # 100-150: Shade 2 (Index 2)
-                 # 150-200: Shade 3 (Index 3)
-                 # 200-245: Shade 4 (Index 4)
-                 # >245 AND Lucky: Accent (Index 5 - Orange)
-
-                 local p_idx=0
+                 p_idx=0
 
                  if (( val < 50 )); then
                     p_idx=0 # Transparent
                  elif (( val > 230 )); then
-                    # Check for sparse accent
-                    # High threshold + Random chance
+                    # Accent
                     if (( (RANDOM % 10) > 5 )); then
                         p_idx=5 # Orange
                     else
                         p_idx=4 # Brightest Gray
                     fi
                  else
-                    # Map 50-240 to 1-4
-                    # (val - 50) * 4 / 190 + 1
                     p_idx=$(( (val - 50) * 4 / 190 + 1 ))
                     if ((p_idx > 4)); then p_idx=4; fi
                     if ((p_idx < 1)); then p_idx=1; fi
@@ -207,7 +194,6 @@ animate() {
 
                  # Render
                  if (( p_idx == 0 )); then
-                    # Transparent: Reset background
                     frame_buffer+="\e[0m  "
                  else
                     color=${palette[$p_idx]}
@@ -215,7 +201,6 @@ animate() {
                  fi
             done
 
-            # Fill remaining real pixels (if width is odd)
             if (( width % 2 != 0 )); then
                 if (( p_idx == 0 )); then
                     frame_buffer+="\e[0m "

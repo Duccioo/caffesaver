@@ -14,17 +14,19 @@ declare -a NOISE_GRID
 # Init
 for ((i=0; i<GRID_W*GRID_H; i++)); do NOISE_GRID[i]=$((RANDOM % 256)); done
 
-source gallery/dunes/config.sh
+_script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$_script_dir/config.sh"
 
 update_grid() {
     local time_offset=$1
+    local scaled_x scaled_y
     for ((y=0; y<GRID_H; y++)); do
         for ((x=0; x<GRID_W; x++)); do
             # Stretch the noise field horizontally for a more "dunes" like effect
-            local scaled_x=$((x * 16))
-            local scaled_y=$((y * 4))
-            local val=$(pnoise $scaled_x $scaled_y $time_offset)
-            NOISE_GRID[y * GRID_W + x]=$val
+            scaled_x=$((x * 16))
+            scaled_y=$((y * 4))
+            pnoise $scaled_x $scaled_y $time_offset
+            NOISE_GRID[y * GRID_W + x]=$_pnoise_result
         done
     done
 }
@@ -60,8 +62,7 @@ pnoise() {
     local i1=$(( v1 + (v2 - v1) * dy / 256 ))
     local i2=$(( v3 + (v4 - v3) * dy / 256 ))
 
-    local v=$(( i1 + (i2 - i1) * dz / 256 ))
-    echo $v
+    _pnoise_result=$(( i1 + (i2 - i1) * dz / 256 ))
 }
 
 animate() {
