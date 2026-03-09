@@ -2,12 +2,28 @@
 
 #~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-
 # MATRIX - A simple, FAST matrix-style screensaver
-#
-# This version is optimized for speed by:
-# 1. Using direct ANSI escape codes instead of forking `tput` for every update.
-# 2. Building a "frame buffer" string with all screen changes for a frame.
-# 3. Printing the entire frame buffer with a single `printf` call.
 #~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+C_SOURCE="$SCRIPT_DIR/matrix.c"
+C_BINARY="$SCRIPT_DIR/matrix.bin"
+
+try_native() {
+    if [[ ! -f "$C_SOURCE" ]]; then return 1; fi
+    if [[ ! -x "$C_BINARY" ]] || [[ "$C_SOURCE" -nt "$C_BINARY" ]]; then
+        local compiler=""
+        for cc in cc clang gcc; do
+            if command -v "$cc" &>/dev/null; then compiler="$cc"; break; fi
+        done
+        if [[ -z "$compiler" ]]; then return 1; fi
+        "$compiler" -O3 -o "$C_BINARY" "$C_SOURCE" -lm 2>/dev/null || return 1
+    fi
+    exec "$C_BINARY"
+}
+
+try_native
+
+# Fallback to pure bash implementation
 
 # --- Configuration ---
 # Color palette for the "dark -> bright -> dark" cycle.

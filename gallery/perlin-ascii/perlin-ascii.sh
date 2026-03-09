@@ -1,7 +1,27 @@
 #!/usr/bin/env bash
 
 # ASCII Perlin-ish Noise Screensaver
-# Optimized: Half-width resolution + Block characters for "Generative Art" look.
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+C_SOURCE="$SCRIPT_DIR/perlin-ascii.c"
+C_BINARY="$SCRIPT_DIR/perlin-ascii.bin"
+
+try_native() {
+    if [[ ! -f "$C_SOURCE" ]]; then return 1; fi
+    if [[ ! -x "$C_BINARY" ]] || [[ "$C_SOURCE" -nt "$C_BINARY" ]]; then
+        local compiler=""
+        for cc in cc clang gcc; do
+            if command -v "$cc" &>/dev/null; then compiler="$cc"; break; fi
+        done
+        if [[ -z "$compiler" ]]; then return 1; fi
+        "$compiler" -O3 -o "$C_BINARY" "$C_SOURCE" -lm 2>/dev/null || return 1
+    fi
+    exec "$C_BINARY"
+}
+
+try_native
+
+# Fallback to pure bash implementation
 
 _cleanup_and_exit() {
   tput cnorm; tput sgr0; echo; exit 0

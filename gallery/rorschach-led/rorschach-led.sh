@@ -1,8 +1,48 @@
 #!/usr/bin/env bash
 
-# Rorschach Screensaver
+# Rorschach-LED Screensaver
 # Generative symmetrical inkblot patterns
-# Based on perlin-pixel with added symmetry logic
+#
+# This launcher will attempt to compile and run a high-performance C version.
+# If no C compiler is found, it falls back to the original Bash animation.
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+C_SOURCE="$SCRIPT_DIR/rorschach-led.c"
+C_BINARY="$SCRIPT_DIR/rorschach-led.bin"
+
+# ─── Try to run the C version ──────────────────────────────────────────
+try_native() {
+    # If C source exists, try to compile & run the native binary
+    if [[ ! -f "$C_SOURCE" ]]; then
+        return 1
+    fi
+
+    # Compile if binary is missing or source is newer
+    if [[ ! -x "$C_BINARY" ]] || [[ "$C_SOURCE" -nt "$C_BINARY" ]]; then
+        local compiler=""
+        for cc in cc clang gcc; do
+            if command -v "$cc" &>/dev/null; then
+                compiler="$cc"
+                break
+            fi
+        done
+        if [[ -z "$compiler" ]]; then
+            return 1  # No compiler found, fall back to bash
+        fi
+        # Compile silently
+        "$compiler" -O3 -o "$C_BINARY" "$C_SOURCE" -lm 2>/dev/null || return 1
+    fi
+
+    # Run the native binary (inherits SCREENSAVER_DELAY from environment)
+    exec "$C_BINARY"
+}
+
+# Attempt native version first
+try_native
+
+# ─── Bash fallback ─────────────────────────────────────────────────────
+# If we reach here, the C version couldn't be compiled or run.
+# Fall back to the original pure-bash implementation.
 
 _cleanup_and_exit() {
   tput cnorm; tput sgr0; echo; exit 0

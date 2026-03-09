@@ -2,9 +2,9 @@
 
 ![Logo](spotlight/logos/logo.320x160.png)
 
-Welcome to **Bash Screensavers**, a collection of animated ASCII art for your terminal. This project brings classic screensaver fun to the command line, written entirely in `bash`.
+Welcome to **Bash Screensavers**, a collection of animated ASCII art for your terminal. This project brings classic screensaver fun to the command line, starting in pure `bash` and now featuring **high-performance C native engines** for the most popular visualizers.
 
-This fork builds upon the original by introducing performance optimizations for macOS, new visualizers, and enhanced features to ensure a seamless experience.
+This fork builds upon the original by introducing **native C optimizations**, new visualizers, and enhanced features to ensure a seamless experience on macOS and Linux.
 
 [Key Features](#key-features) -
 [Gallery](#gallery) -
@@ -18,11 +18,11 @@ This fork builds upon the original by introducing performance optimizations for 
 
 ## Key Features
 
-*   **Pure Bash:** No external dependencies required, just a `bash` shell (v3.2+).
-*   **macOS Optimizations:** The main script is optimized for macOS, ensuring smooth performance and compatibility.
-*   **Automatic `caffeinate`:** On macOS, the script automatically uses `caffeinate -d` to prevent the display from sleeping, allowing for an uninterrupted screensaver experience.
-*   **Perlin Noise Engine:** Includes a custom-built, integer-based Perlin noise implementation written in pure Bash, powering generative animations like "Dunes".
-*   **New Screensavers:** Includes exclusive screensavers like **Dunes** (a mesmerizing, animated landscape) and **Rorschach** (generative symmetrical inkblots).
+*   **Smart Native Engine:** The most popular screensavers (`rorschach-led`, `matrix`, `dunes`, `perlin-ascii`, `perlin-pixel`) are now rewritten in **C** for ultra-low CPU usage (< 1%) and buttery smooth **60 FPS** animations.
+*   **Automatic Compilation:** The main launcher handles C compilation automatically. If a compiler (`clang`, `gcc`, or `cc`) is present, it builds the native binary on the first run.
+*   **Pure Bash Fallback:** No compiler? No problem. The project remains fully functional with the original pure `bash` implementations as a fallback.
+*   **macOS Sleep Prevention:** Automatically uses `caffeinate -d` on macOS to prevent the display from sleeping while the screensaver is active.
+*   **Classic & Modern Visuals:** From the mesmerizing **Dunes** (3D Perlin noise) to **Rorschach** inkblots (symmetrical generative art).
 
 ## Gallery
 
