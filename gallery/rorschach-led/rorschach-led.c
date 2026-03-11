@@ -12,26 +12,26 @@
  *
  * Optimized C rewrite of the original bash version.
  * Features:
- *   - 20x20 internal noise grid (vs 10x10 in bash) for smoother blobs
- *   - Bilinear interpolation for pixel-perfect gradients
- *   - 256-color palette with warm accent tones
- *   - Smooth easing transitions between target values
- *   - 5 symmetry modes (Vertical, Horizontal, Diagonal, Quad, Kaleidoscope)
- *   - Periodically morphs symmetry mode for organic evolution
- *   - Full-screen double-buffered output via single write() call
- *   - Reads SCREENSAVER_DELAY env var for configurable framerate
+ *   - 10x10 internal noise grid for "ink-blob" figures
+ *   - Bilinear interpolation for liquid gradients
+ *   - Light Gray background (Paper-like) with Dark/Black ink & Orange accent
+ *   - 5 symmetry modes (Vertical, Horizontal, Diagonal, Double, Quad)
+ *   - Automatic symmetry morphing every ~50 seconds
+ *   - Single write() per frame via 512KB frame buffer
  */
 
 // ── Configuration ──────────────────────────────────────────────────────
 #define DEFAULT_FPS     30
-#define GRID_W          20
-#define GRID_H          20
-#define FRAME_BUF_SIZE  (1024 * 512)  // 512KB frame buffer (plenty)
-#define MORPH_INTERVAL  1200          // frames between symmetry mode morphs (40s at 30fps)
+#define GRID_W          10            // High-detail "ink-blob" resolution
+#define GRID_H          10
+#define FRAME_BUF_SIZE  (1024 * 512)
+#define MORPH_INTERVAL  1500          // Frames between symmetry mode morphs
 
 // ── Palette ────────────────────────────────────────────────────────────
-// 256-color indices: transparent(default bg), dark grays → light, orange accent
-static const int palette_256[] = { 16, 237, 240, 245, 252, 208 };
+// 0: Light Gray background (252)
+// 1-4: Lighter Silhouettes (235-244)
+// 5: Orange Accent (202)
+static const int palette_256[] = { 252, 235, 238, 241, 244, 202 };
 #define PALETTE_LEN 6
 
 // ── Types ──────────────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ typedef struct { int current, target; } Cell;
 
 // ── Globals ────────────────────────────────────────────────────────────
 static Cell   grid[GRID_W * GRID_H];
-static int    sym_mode       = 0;
+static int    sym_mode       = 0;     // 0:V, 1:H, 2:D, 3:VH, 4:VHD
 static int    term_width     = 80;
 static int    term_height    = 24;
 static int    delay_us       = 1000000 / DEFAULT_FPS;
@@ -80,7 +80,7 @@ static inline void fb_append_str(const char *s) {
 static void symmetrize_grid(void) {
     int r, c, src, tgt;
 
-    // Diagonal mirror
+    // Diagonal mirror (r,c <-> c,r)
     if (sym_mode == 2 || sym_mode == 4) {
         for (r = 0; r < GRID_H; r++)
             for (c = r + 1; c < GRID_W; c++) {
@@ -110,7 +110,8 @@ static void symmetrize_grid(void) {
 }
 
 static void init_grid(void) {
-    sym_mode = rand() % 5;
+    srand((unsigned)time(NULL));
+    do { sym_mode = rand() % 5; } while (sym_mode == 1); // Skip purely horizontal
     for (int i = 0; i < GRID_W * GRID_H; i++) {
         grid[i].current = rand() % 256;
         grid[i].target  = rand() % 256;
@@ -125,18 +126,17 @@ static void update_grid(void) {
         if (diff == 0) {
             grid[i].target = rand() % 256;
         } else {
-            int step = diff / 20;   // slow, organic easing
+            int step = diff / 25; // Smooth "liquid ink" transition
             if (step == 0) step = (diff > 0) ? 1 : -1;
             grid[i].current += step;
         }
     }
     symmetrize_grid();
 
-    // Periodically morph symmetry mode for organic evolution
     frame_count++;
     if (frame_count >= MORPH_INTERVAL) {
         frame_count = 0;
-        sym_mode = rand() % 5;
+        do { sym_mode = rand() % 5; } while (sym_mode == 1);
     }
 }
 
@@ -151,7 +151,7 @@ static void render_frame(void) {
     fb_append_str("\033[H");   // cursor home
 
     char tmp[64];
-    int prev_color = -1;       // track last color to skip redundant escapes
+    int prev_color = -1;
 
     for (int y = 0; y < term_height; y++) {
         int y_sc = (y * (GRID_H - 1) * 1000) / term_height;
@@ -164,13 +164,13 @@ static void render_frame(void) {
             int x_sc = (x * (GRID_W - 1) * 1000) / calc_width;
             int gx   = x_sc / 1000;
             int rx   = x_sc % 1000;
+            int gx1  = gx + 1 < GRID_W ? gx + 1 : gx;
 
-            // Bilinear interpolation
+            // Bilinear interpolation for liquid shapes
             int v_tl = grid[r1 + gx].current;
             int v_bl = grid[r2 + gx].current;
             int v_left = v_tl + ((v_bl - v_tl) * ry) / 1000;
 
-            int gx1 = gx + 1 < GRID_W ? gx + 1 : gx;
             int v_tr = grid[r1 + gx1].current;
             int v_br = grid[r2 + gx1].current;
             int v_right = v_tr + ((v_br - v_tr) * ry) / 1000;
@@ -180,44 +180,37 @@ static void render_frame(void) {
             if (val < 0)   val = 0;
             if (val > 255) val = 255;
 
-            // Mapping value (0-255) to palette index (0-5)
+            // Mapping to a high-density inkblot look with Light Background
             int p_idx;
             if (val < 40) {
-                p_idx = 0; // Transparent/Dark
-            } else if (val > 235) {
-                p_idx = 5; // Orange accent
-            } else if (val > 190) {
-                p_idx = 4; // Brightest Gray
+                p_idx = 0; // Light Gray Background (sporadic/minimal)
+            } else if (val > 240) {
+                p_idx = 5; // Orange Accent
+            } else if (val > 120) {
+                p_idx = 1; // Solid Black
+            } else if (val > 90) {
+                p_idx = 2; // Darkest Gray
+            } else if (val > 70) {
+                p_idx = 3; // Dark Gray
             } else {
-                // Map the range [40, 190] to palette indices [1, 3]
-                p_idx = 1 + ((val - 40) * 3) / 150;
+                p_idx = 4; // Medium Gray
             }
 
             int color = palette_256[p_idx];
 
-            // Only emit escape if color changed (huge speedup)
             if (color != prev_color) {
-                if (p_idx == 0) {
-                    fb_append_str("\033[0m");
-                } else {
-                    int n = snprintf(tmp, sizeof(tmp), "\033[48;5;%dm", color);
-                    fb_append(tmp, n);
-                }
+                int n = snprintf(tmp, sizeof(tmp), "\033[48;5;%dm", color);
+                fb_append(tmp, n);
                 prev_color = color;
             }
             fb_append_str("  ");
         }
 
-        // Odd-width column
-        if (term_width & 1) {
-            fb_append_str(" ");
-        }
+        if (term_width & 1) fb_append_str(" ");
 
-        fb_append_str("\033[0m");
-        prev_color = -1;   // reset after line reset
-        if (y < term_height - 1) {
-            fb_append("\n", 1);
-        }
+        fb_append_str("\033[0m"); // reset color at EOL
+        prev_color = -1;
+        if (y < term_height - 1) fb_append("\n", 1);
     }
 
     write(STDOUT_FILENO, frame_buffer, fb_len);
@@ -225,21 +218,18 @@ static void render_frame(void) {
 
 // ── Main ───────────────────────────────────────────────────────────────
 int main(void) {
-    // Allocate frame buffer on heap
     frame_buffer = (char *)malloc(FRAME_BUF_SIZE);
     if (!frame_buffer) return 1;
 
-    // Hide cursor & clear
+    // Hide cursor, Clear screen
     write(STDOUT_FILENO, "\033[?25l\033[2J", 10);
 
     signal(SIGINT,  handle_signal);
     signal(SIGTERM, handle_signal);
 
-    srand((unsigned)time(NULL));
     update_term_size();
     init_grid();
 
-    // Read optional delay from environment
     const char *env = getenv("SCREENSAVER_DELAY");
     if (env) {
         double d = atof(env);
@@ -252,7 +242,7 @@ int main(void) {
         usleep(delay_us);
     }
 
-    // Restore terminal
+    // Restore terminal state
     const char *restore = "\033[?25h\033[0m\033[2J\033[H";
     write(STDOUT_FILENO, restore, strlen(restore));
     free(frame_buffer);
