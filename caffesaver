@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# caffesaver - direct entrypoint
+DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+exec "$DIR/screensaver.sh" "$@"

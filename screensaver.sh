@@ -6,13 +6,11 @@
 # Because who needs fancy graphics when you have ASCII?
 #
 
-BASH_SCREENSAVERS_NAME='Bash Screensavers'
+BASH_SCREENSAVERS_NAME='caffesaver'
 BASH_SCREENSAVERS_VERSION='0.0.28'
 BASH_SCREENSAVERS_CODENAME='Mystic Map'
-BASH_SCREENSAVERS_URL='https://github.com/attogram/bash-screensavers'
-BASH_SCREENSAVERS_DISCORD='https://discord.gg/BGQJCbYVBa'
+BASH_SCREENSAVERS_URL='https://github.com/Duccioo/caffesaver'
 BASH_SCREENSAVERS_LICENSE='MIT'
-BASH_SCREENSAVERS_COPYRIGHT='Copyright (c) 2025 Attogram Project <https://github.com/attogram>'
 
 # Global Performance Settings
 export SCREENSAVER_FPS=30
@@ -238,7 +236,7 @@ _main_menu_cleanup() {
     tput cnorm # Ensure cursor is visible
     tput sgr0  # Reset terminal attributes
     tput rmcup # Ensure we leave alternate screen if we were in it
-    echo; echo; echo 'Enjoyed Bash Screensavers? Give the project a star on GitHub! ✨'
+    echo; echo; echo 'Enjoyed caffesaver? Give the project a star on GitHub! ✨'
     echo; echo "${BASH_SCREENSAVERS_URL}"; echo
 }
 
@@ -278,8 +276,8 @@ Oh no! Screensaver had trouble! Error code: %d
     done
 }
 
-BASH_SCREENSAVERS_DESCRIPTION="A collection of screensavers written in bash."
-BASH_SCREENSAVERS_USAGE="Usage: $0 [-h|--help] [-v|--version] [-n <name>|--new <name>] [-r|--random] [-d] [-m <name>] [name|number]"
+BASH_SCREENSAVERS_DESCRIPTION="A curated collection of animated terminal screensavers and generative ASCII/ANSI art."
+BASH_SCREENSAVERS_USAGE="Usage: caffesaver [-h|--help] [-v|--version] [-n <name>|--new <name>] [-r|--random] [-d] [-m <name>] [name|number]"
 
 run_direct() {
     local choice="$1"

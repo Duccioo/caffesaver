@@ -1,19 +1,19 @@
-# Contributing to Bash Screensavers
+# Contributing to caffesaver
 
-First off, thank you for considering contributing to Bash Screensavers! It’s people like you that make this project so much fun. We're excited to see what you'll bring to our collection of ASCII art animations.
+First off, thank you for considering contributing to caffesaver! It’s people like you that make this project so much fun. We're excited to see what you'll bring to our collection of ASCII art animations.
 
 ## Why Contribute?
 
-Contributing to Bash Screensavers is a great way to show off your creativity and practice your shell scripting skills. This project is all about having fun and making the command line a more exciting place. Whether you're a seasoned developer or just starting out, we welcome your ideas and contributions.
+Contributing to caffesaver is a great way to show off your creativity and practice your shell scripting and C coding skills. This project is all about having fun and making the command line a more exciting place. Whether you're a seasoned developer or just starting out, we welcome your ideas and contributions.
 
 Here are a few reasons why you might want to contribute:
 
 *   **Have fun!** This project is all about creativity and making cool things.
-*   **Learn and practice.** Sharpen your `bash` scripting skills and learn how to create animations in the terminal.
+*   **Learn and practice.** Sharpen your `bash` and `C` skills and learn how to create animations in the terminal.
 *   **Be part of a community.** Join a group of like-minded people who love to tinker with the command line.
 *   **Make your mark.** Create a screensaver that will be used by people all over the world.
 
-We welcome contributions of all kinds, from new screensavers to bug fixes and documentation improvements. If you have an idea, we'd love to hear it!
+We welcome contributions of all kinds, from new screensavers to bug fixes, native C engines, and documentation improvements. If you have an idea, we'd love to hear it!
 
 ### Create Your Own Screensaver
 
@@ -24,6 +24,8 @@ Got an idea for a cool ASCII animation? Want to contribute to the collection? It
 You can use the built-in generator to create a new screensaver with all the boilerplate code you need. Just run:
 
 ```bash
+caffesaver --new my-awesome-screensaver
+# or
 ./screensaver.sh --new my-awesome-screensaver
 ```
 (You can also use `-n` instead of `--new`)
@@ -43,61 +45,40 @@ That's it! The main `screensaver.sh` script will automatically detect your new c
 
 ### Project Overview
 
-* `./screensaver.sh` is the main menu script
-    * it shows a list of available screensavers
-    * and prompts user to pick one to run.
-* `./gallery` is the gallery directory, where all screensavers are stored.
-    * Each screensaver has its own directory inside `./gallery`
-        * The name of the directory is the name of the screensaver.
-        * example: screensaver named 'foo' is in: `./gallery/foo`
-    * Each screensaver has a run script in format 'name.sh'
-        * example: `./gallery/foo/foo.sh`
-    * Each screensaver has a config file with name, tagline, etc
-        * example: `./gallery/foo/config.sh`
-* `./tests` directory is the BATS test suite for this project
-* `./.github` directory is for GitHub Workflows for this project.
+* `./caffesaver` (o `./screensaver.sh`) è lo script principale del menu
+    * mostra l'elenco degli screensaver disponibili
+    * e richiede all'utente di selezionarne uno da eseguire.
+* `./gallery` è la directory della galleria, in cui sono memorizzati tutti gli screensaver.
+    * Ciascun screensaver ha la propria directory in `./gallery`
+        * Il nome della directory è il nome dello screensaver.
+        * Esempio: uno screensaver chiamato 'foo' si trova in `./gallery/foo`
+    * Ciascun screensaver ha uno script di esecuzione nel formato 'name.sh' (e opzionalmente 'name.c' per il motore nativo C)
+        * Esempio: `./gallery/foo/foo.sh`
+    * Ciascun screensaver ha un file di configurazione con nome, tagline, ecc.
+        * Esempio: `./gallery/foo/config.sh`
+* `./jury` contiene la suite di test BATS per questo progetto
+* `./Formula` contiene la Formula Homebrew per l'installazione su macOS
 
 ### Project Structure
 
 ```
 .
-├─ screensaver.sh    # Where the ASCII magic begins
-├─ LICENSE           # MIT Licensed, because all the cool kids are doing it
-├─ README.md         # This file, isn't it pretty?
-├─ CONTRIBUTING.md   # help us out
-├─ AGENTS.md         # Vibe Vibe Vibe!
-├─ gallery           # Welcome to the Gallery of Terminal Visualizations
-│   ├─ name          # I'm a screensaver, and I have my own directory!
-│   │   └─ name.sh   # I'm a screensaver, and I can run, run, run!
-│   │   └─ config.sh # Psst... want some free metadata?
-├─ jury              # I gotta BATSy idea, we should test this stuff
-│   └─ tests.bats    # It can't be that bad, can it?
-├─ spotlight         # Tools for curators
-└─ .github           # GitHub magic lives here
-    └─ workflows
-        └─ create.release.for.tag.yml
+├─ caffesaver        # Entrypoint CLI rapido
+├─ screensaver.sh    # Script principale del menu e dispatcher
+├─ install.sh        # Installer per /usr/local/bin/caffesaver
+├─ Formula/          # Formula Homebrew per macOS (brew install caffesaver)
+├─ LICENSE           # Licenza MIT
+├─ README.md         # Documentazione principale con anteprime
+├─ CONTRIBUTING.md   # Questa guida
+├─ gallery/          # Galleria di tutti i 18 screensaver
+│   ├─ <name>/
+│   │   ├─ <name>.sh # Script Bash con logica JIT per C e fallback
+│   │   ├─ <name>.c  # Sorgente C ad alte prestazioni (opzionale)
+│   │   └─ config.sh # Metadati dello screensaver
+├─ library/          # Librerie condivise (grafica, TTS)
+├─ jury/             # Suite di test automatizzati BATS
+└─ spotlight/        # Toolkit per recording e banner/anteprime
 ```
-
-### Style Suggestions
-
-* Indents **SHOULD** be whatever works for you
-* Functions and variables **SHOULD** be in `snake_case`
-* Super-duper important variables **SHOULD** be in `SCREAMING_SNAKE_CASE`
-* You **MUST** have fun
-    * Why use boring function names like `main()`
-      when `start_the_visual_pleasure()` is just a few more characters
-
-### Requirements
-
-* Bash v3.2 for `./screensaver.sh`
-* Individual screensavers may use any Bash version that makes them happy
-* All screensavers must die with honor
-  * Gracefully handle `^C` to clean up the terminal and `exit 0`
-* All shell scripts must have execute permission: `chmod +x *.sh`
-
-### Codespaces
-
-* whip up a [Codespace from attogram/bash-screensavers](https://codespaces.new/attogram/bash-screensavers) for fun!
  
  
  
