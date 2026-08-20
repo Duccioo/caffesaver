@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Duccioo/caffesaver/releases"><img src="https://img.shields.io/badge/release-v0.0.28-brightgreen.svg?style=flat-square" alt="Release v0.0.28" /></a>
+  <a href="https://github.com/Duccioo/caffesaver/releases"><img src="https://img.shields.io/badge/release-v0.1.0-brightgreen.svg?style=flat-square" alt="Release v0.1.0" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="MIT License" /></a>
   <img src="https://img.shields.io/badge/codename-Mystic_Map-purple.svg?style=flat-square" alt="Codename Mystic Map" />
   <img src="https://img.shields.io/badge/brew-caffesaver-orange.svg?style=flat-square" alt="Homebrew Ready" />

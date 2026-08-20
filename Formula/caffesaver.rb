@@ -1,7 +1,8 @@
 class Caffesaver < Formula
   desc "Animated terminal screensavers & generative art with C engine and caffeinate anti-sleep"
   homepage "https://github.com/Duccioo/caffesaver"
-  url "https://github.com/Duccioo/caffesaver/archive/refs/tags/v0.0.28.tar.gz"
+  url "https://github.com/Duccioo/caffesaver/archive/refs/tags/v0.1.0.tar.gz"
+  sha256 "b1c47e7788acf0806e8c978a92a2635340077d2a69b0945492d50d3b25bbbf63"
   head "https://github.com/Duccioo/caffesaver.git", branch: "main"
   license "MIT"
 
