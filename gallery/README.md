@@ -9,6 +9,7 @@ Each visualizer in our collection runs either on a high-performance native **C e
 [cutesaver](#cutesaver) -
 [dunes](#dunes) -
 [fireworks](#fireworks) -
+[inkscope](#inkscope) -
 [life](#life) -
 [matrix](#matrix) -
 [perlin-ascii](#perlin-ascii) -
@@ -91,6 +92,19 @@ Each visualizer in our collection runs either on a high-performance native **C e
 **Engine:** 🐚 Pure Bash  
 **License:** MIT  
 **[View Cast](./fireworks/fireworks.cast)**
+
+---
+
+## [inkscope](./inkscope/)
+
+*kaleidoscopic ink with LED accents*
+
+![Preview](./inkscope/inkscope.gif)
+
+**Description:** The original `rorschach-led` engine: a coarse noise grid with bilinear interpolation, mirrored with randomly changing symmetry modes (vertical, diagonal, double, quad), on a paper-like background with glowing orange accents.
+
+**Engine:** ⚡ C Native + 🐚 Bash Fallback  
+**License:** MIT  
 
 ---
 
@@ -178,9 +192,19 @@ Each visualizer in our collection runs either on a high-performance native **C e
 
 ![Preview](./rorschach/rorschach.gif)
 
-**Description:** Symmetrical inkblot patterns morphing continuously, inspired by psychological projective tests.
+**Description:** An endless inkblot: a slice of 3D Perlin noise flowing through time, shaped like a blot and folded on the vertical axis, so it never restarts and keeps morphing from one figure into the next. Ragged edges, white holes, droplets and an ink that slowly drifts between solid black and watercolour washes. Mirrored, low-resolution rendering keeps it very light on the CPU (24-bit colour when available).
 
-**Engine:** 🐚 Pure Bash  
+**Options** (environment variables, also for `rorschach-led`):
+
+| Variable | Values | Effect |
+| :--- | :--- | :--- |
+| `RORSCHACH_RES` | `low`, `medium` *(default)*, `high` | Pixel size: 4×2 cells, 2×1 cells, or half-blocks (`▀`) |
+| `RORSCHACH_BG` | `transparent` *(default)*, `paper` | Draw on the terminal's own background or on a cream paper sheet |
+| `RORSCHACH_INK` | `light` *(default)*, `dark` | Ink colour on a transparent background: use `dark` on light terminals |
+
+e.g. `RORSCHACH_RES=high RORSCHACH_BG=paper caffesaver -m rorschach`
+
+**Engine:** ⚡ C Native + 🐚 Bash Fallback  
 **License:** MIT  
 
 ---
@@ -191,7 +215,7 @@ Each visualizer in our collection runs either on a high-performance native **C e
 
 ![Preview](./rorschach-led/rorschach-led.gif)
 
-**Description:** Ultra-smooth 60 FPS generative symmetrical inkblots rendered on paper-like backgrounds with glowing orange LED accents.
+**Description:** The `rorschach` inkblots with a second, vividly coloured ink (red, orange or crimson) printed over the main ink — like the coloured Rorschach cards — gently glowing.
 
 **Engine:** ⚡ C Native + 🐚 Bash Fallback  
 **License:** MIT  

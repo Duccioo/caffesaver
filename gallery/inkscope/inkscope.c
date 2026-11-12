@@ -8,7 +8,7 @@
 #include <math.h>
 
 /*
- * rorschach-led — High-performance terminal Rorschach inkblot screensaver
+ * inkscope — Kaleidoscopic ink-blob screensaver (the original rorschach-led engine)
  *
  * Optimized C rewrite of the original bash version.
  * Features:

@@ -1,8 +1,36 @@
 #!/usr/bin/env bash
 
 # Rorschach Screensaver
-# Generative symmetrical inkblot patterns
-# Based on perlin-pixel with added symmetry logic
+# Generative symmetrical inkblots: ink is dropped on one half of the sheet,
+# the paper is folded and the blot blooms, breathes and fades away.
+#
+# Runs the native C engine (rorschach.c) when a C compiler is available,
+# otherwise falls back to a simpler pure-bash version.
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+C_SOURCE="$SCRIPT_DIR/rorschach.c"
+C_BINARY="$SCRIPT_DIR/rorschach.bin"
+
+# ─── Try to run the C version ──────────────────────────────────────────
+try_native() {
+    if [[ ! -f "$C_SOURCE" ]]; then return 1; fi
+    # Compile if binary is missing or source is newer
+    if [[ ! -x "$C_BINARY" ]] || [[ "$C_SOURCE" -nt "$C_BINARY" ]]; then
+        local compiler=""
+        for cc in cc clang gcc; do
+            if command -v "$cc" &>/dev/null; then compiler="$cc"; break; fi
+        done
+        if [[ -z "$compiler" ]]; then return 1; fi
+        "$compiler" -O3 -o "$C_BINARY" "$C_SOURCE" -lm 2>/dev/null || return 1
+    fi
+    # Run the native binary (inherits SCREENSAVER_DELAY from environment)
+    exec "$C_BINARY" "$@"
+}
+
+try_native "$@"
+
+# ─── Bash fallback ─────────────────────────────────────────────────────
+# If we reach here, the C version couldn't be compiled or run.
 
 _cleanup_and_exit() {
   tput cnorm; tput sgr0; echo; exit 0
@@ -24,8 +52,8 @@ declare -a TARGET_GRID
 SYM_MODE=0
 
 init_symmetry() {
-    local modes=(0 2 3 4)
-    SYM_MODE=${modes[$((RANDOM % 4))]}
+    # Real inkblots are folded once: mirror left/right only
+    SYM_MODE=0
 }
 
 symmetrize_grid() {

@@ -39,7 +39,7 @@
 
 ## ✨ Key Features
 
-* **⚡ Native C Performance at 60 FPS:** Computationally intensive visualizers (`rorschach-led`, `dunes`, `matrix`, `perlin-ascii`, `perlin-pixel`) feature native **C engines** compiled with `-O3` optimizations for silky smooth 60 FPS rendering with < 1% CPU usage.
+* **⚡ Native C Performance at 60 FPS:** Computationally intensive visualizers (`rorschach`, `rorschach-led`, `inkscope`, `dunes`, `matrix`, `perlin-ascii`, `perlin-pixel`) feature native **C engines** compiled with `-O3` optimizations for silky smooth 60 FPS rendering with < 1% CPU usage.
 * **🔄 Transparent JIT Auto-Compilation:** When launching any visualizer, `caffesaver` automatically detects available compilers (`clang`, `gcc`, or `cc`) and builds the binary on the first run (`.bin`).
 * **🐚 Zero-Dependency Pure Bash Fallback:** No C compiler installed? No problem. Every visualizer includes a pure `bash` fallback implementation ensuring it runs everywhere out of the box.
 * **☕ macOS Anti-Sleep (`caffeinate`):** Automatically wraps screensaver execution with `caffeinate -d` on macOS to prevent display dimming and screen sleep while your terminal artwork runs.
@@ -53,10 +53,10 @@
 
 Here is a glimpse of some of the screensavers in action:
 
-| **Rorschach Inkblots** | **Dunes (3D Perlin Noise)** |
+| **Rorschach (endless inkblot)** | **Dunes (3D Perlin Noise)** |
 | :---: | :---: |
-| <img src="gallery/rorschach-led/rorschach-led.gif" alt="Rorschach LED Screensaver" width="380" /> | <img src="gallery/dunes/dunes.gif" alt="Dunes Screensaver" width="380" /> |
-| *Generative symmetrical inkblot patterns with LED accents* | *3D animated topographic sand waves* |
+| <img src="gallery/rorschach/rorschach.gif" alt="Rorschach Screensaver" width="380" /> | <img src="gallery/dunes/dunes.gif" alt="Dunes Screensaver" width="380" /> |
+| *An inkblot flowing forever on 3D Perlin noise* | *3D animated topographic sand waves* |
 
 | **Digital Matrix Rain** | **Spirograph Generative Art** |
 | :---: | :---: |
@@ -172,14 +172,15 @@ Explore all **18 screensavers** included in the [`gallery/`](./gallery/README.md
 | **[cutesaver](./gallery/cutesaver/)** | 🐚 Pure Bash | Infinite whimsical slideshow of hand-crafted ASCII illustrations. |
 | **[dunes](./gallery/dunes/)** | ⚡ C + 🐚 Bash | 3D animated topographic sand dunes generated via smooth Perlin noise. |
 | **[fireworks](./gallery/fireworks/)** | 🐚 Pure Bash | Dazzling pyrotechnic rockets bursting into shimmering particles. |
+| **[inkscope](./gallery/inkscope/)** | ⚡ C + 🐚 Bash | The original rorschach-led engine: kaleidoscopic ink blobs with changing symmetries and orange accents. |
 | **[life](./gallery/life/)** | 🐚 Pure Bash | Conway's Game of Life cellular automata simulation in the terminal. |
 | **[matrix](./gallery/matrix/)** | ⚡ C + 🐚 Bash | Iconic falling digital rain stream with multi-shade green color cycles. |
 | **[perlin-ascii](./gallery/perlin-ascii/)** | ⚡ C + 🐚 Bash | Continuous animated Perlin noise terrain rendered in ASCII character gradients. |
 | **[perlin-pixel](./gallery/perlin-pixel/)** | ⚡ C + 🐚 Bash | High-density grayscale Perlin noise rendered with Unicode half-block characters (`▄`, `▀`). |
 | **[pipes](./gallery/pipes/)** | 🐚 Pure Bash | Legendary animated 3D pipe labyrinth with rich customization options. |
 | **[rain](./gallery/rain/)** | 🐚 Pure Bash | Soothing digital rainstorm simulation with falling drops and splash physics. |
-| **[rorschach](./gallery/rorschach/)** | 🐚 Pure Bash | Generative symmetrical inkblot patterns inspired by psychological projective tests. |
-| **[rorschach-led](./gallery/rorschach-led/)** | ⚡ C + 🐚 Bash | Generative symmetrical inkblots illuminated with vibrant LED color accents. |
+| **[rorschach](./gallery/rorschach/)** | ⚡ C + 🐚 Bash | Endless folded-paper inkblot flowing on 3D Perlin noise, with ragged edges, washes and droplets. |
+| **[rorschach-led](./gallery/rorschach-led/)** | ⚡ C + 🐚 Bash | Rorschach inkblots with a second, glowing red/orange accent ink. |
 | **[speaky](./gallery/speaky/)** | 🐚 Pure Bash | Dramatic talking screensaver delivering monologues using system Text-to-Speech engines. |
 | **[spirograph](./gallery/spirograph/)** | 🐚 Pure Bash | Hypnotic geometric wireframe patterns generated slowly in monochrome sub-pixels. |
 | **[stars](./gallery/stars/)** | 🐚 Pure Bash | Peaceful twinkling cosmos starfield simulation for quiet contemplation. |
