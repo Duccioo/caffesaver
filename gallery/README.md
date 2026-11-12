@@ -194,15 +194,15 @@ Each visualizer in our collection runs either on a high-performance native **C e
 
 **Description:** An endless inkblot: a slice of 3D Perlin noise flowing through time, shaped like a blot and folded on the vertical axis, so it never restarts and keeps morphing from one figure into the next. Ragged edges, white holes, droplets and an ink that slowly drifts between solid black and watercolour washes. Mirrored, low-resolution rendering keeps it very light on the CPU (24-bit colour when available).
 
-**Options** (environment variables, also for `rorschach-led`):
+**Options** (also for `rorschach-led`), as flags after the name or as environment variables:
 
-| Variable | Values | Effect |
+| Flag | Variable | Effect |
 | :--- | :--- | :--- |
-| `RORSCHACH_RES` | `low`, `medium` *(default)*, `high` | Pixel size: 4×2 cells, 2×1 cells, or half-blocks (`▀`) |
-| `RORSCHACH_BG` | `transparent` *(default)*, `paper` | Draw on the terminal's own background or on a cream paper sheet |
-| `RORSCHACH_INK` | `light` *(default)*, `dark` | Ink colour on a transparent background: use `dark` on light terminals |
+| `--low` / `--medium` *(default)* / `--high` | `RORSCHACH_RES=low\|medium\|high` | Pixel size: 4×2 cells, 2×1 cells, or half-blocks (`▀`) |
+| `--paper` / `--transparent` *(default)* | `RORSCHACH_BG=paper\|transparent` | Cream paper sheet, or the terminal's own background |
+| — | `RORSCHACH_INK=light\|dark` | Ink colour on a transparent background (`dark` for light terminals) |
 
-e.g. `RORSCHACH_RES=high RORSCHACH_BG=paper caffesaver -m rorschach`
+e.g. `caffesaver rorschach --paper --high` or `RORSCHACH_RES=low caffesaver -m rorschach-led`
 
 **Engine:** ⚡ C Native + 🐚 Bash Fallback  
 **License:** MIT  

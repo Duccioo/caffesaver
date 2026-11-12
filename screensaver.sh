@@ -27,6 +27,7 @@ DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 BASH_SCREENSAVERS_GALLERY="$DIR/gallery"
 
 chosen_screensaver='' # the chosen one
+saver_args=()         # extra options passed through to the screensaver
 
 # Peak into the gallery
 #
@@ -76,7 +77,7 @@ Woah there, partner! This screensaver ain't ready for the big show yet.
     tput smcup
 
     # Construct command
-    local cmd=("$visual_goodness")
+    local cmd=("$visual_goodness" ${saver_args[@]+"${saver_args[@]}"})
     # Check for caffeinate (macOS prevent sleep)
     if command -v caffeinate &> /dev/null; then
         cmd=(caffeinate -d "${cmd[@]}")
@@ -277,7 +278,7 @@ Oh no! Screensaver had trouble! Error code: %d
 }
 
 BASH_SCREENSAVERS_DESCRIPTION="A curated collection of animated terminal screensavers and generative ASCII/ANSI art."
-BASH_SCREENSAVERS_USAGE="Usage: caffesaver [-h|--help] [-v|--version] [-n <name>|--new <name>] [-r|--random] [-d] [-m <name>] [name|number]"
+BASH_SCREENSAVERS_USAGE="Usage: caffesaver [-h|--help] [-v|--version] [-n <name>|--new <name>] [-r|--random] [-d] [-m <name>] [name|number] [screensaver options...]"
 
 run_direct() {
     local choice="$1"
@@ -369,11 +370,21 @@ main() {
                 target="$2"
                 shift 2
                 ;;
+            --)
+                # everything after '--' goes to the screensaver
+                shift
+                saver_args+=("$@")
+                break
+                ;;
             *)
-                # Backward compatibility: if first arg is not flag, treat as direct run or check next
+                # First non-flag argument: the screensaver to run (name or number).
+                # Anything else is an option for the screensaver itself,
+                # e.g. caffesaver rorschach --paper --high
                 if [[ "$mode" == "menu" ]]; then
                      mode="direct"
                      target="$1"
+                else
+                     saver_args+=("$1")
                 fi
                 shift
                 ;;
